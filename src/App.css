@@ -1,42 +1,77 @@
+:root {
+  --button_text_decoration: none;
+  --button_font_weight: 600;
+  --button_font_family: Open Sans,sans-serif;
+  --button_font_size: 15px;
+  --button_color: #fff;
+  --button_text_transform: none;
+  --button_bg_color: #243b5c;
+  --button_bg_color_active: #243b5c;
+  --button_border_top: 0px solid #38bcc4;
+  --button_border_right: 0px solid #38bcc4;
+  --button_border_bottom: 0px solid #38bcc4;
+  --button_border_left: 0px solid #38bcc4;
+  --button_border_top_active: 0px solid #38bcc4;
+  --button_border_right_active: 0px solid #38bcc4;
+  --button_border_bottom_active: 0px solid #38bcc4;
+  --button_border_left_active: 0px solid #38bcc4;
+  --button_corner_radius: 20px;
+  --button_spacing: 9px 17px 9px 17px;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  color: #1a1a1a;
 }
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+main {
+  height: 300px;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
 .card {
-  padding: 2em;
+  display: grid;
+  grid-gap: 10px;
+  justify-content: start;
+  align-content: start;
+  font-weight: 600;
 }
-
-.read-the-docs {
-  color: #888;
+.unauthenticated {
+  display: flex;
+  padding: 20px;
+  background: orangered;
+  height: auto;
+}
+.authenticated {
+  display: flex;
+  padding: 20px;
+  height: auto;
+  background: limegreen;
+}
+.button, button {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background-color: #38bcc4;
+  border-bottom: var(--button_border_bottom);
+  border-left: var(--button_border_left);
+  border-radius: var(--button_corner_radius);
+  border-right: var(--button_border_right);
+  border-top: var(--button_border_top);
+  box-shadow: 0 0 0 2px rgba(105,105,178,0);
+  color: var(--button_color);
+  cursor: pointer;
+  display: inline-block;
+  font-family: var(--button_font_family);
+  font-size: var(--button_font_size);
+  font-weight: var(--button_font_weight);
+  line-height: 1.5;
+  padding: var(--button_spacing);
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-transform: var(--button_text_transform);
+  transition: opacity .2s ease,background .2s ease,box-shadow .2s ease,border .2s ease;
+  white-space: normal;
+  z-index: 1
 }
