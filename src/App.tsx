@@ -1,37 +1,42 @@
 import './App.css'
 
-import {useMachine} from "@xstate/react";
+import {useMachine} from '@xstate/react'
+import {useEffect} from 'react'
 
-import {authenticationMachine} from "./state/authentication/authentication.machine.ts";
-import {useEffect} from "react";
+import {authenticationMachine} from './state/authentication/authentication.machine.ts'
 
 function App() {
 
-  const [state, send] = useMachine(authenticationMachine)
+  const [snapshot, send] = useMachine(authenticationMachine)
 
   const handleLogin = () => {
     send({ type: 'login' })
   }
 
+  const handleLogout = () => {
+    send({ type: 'logout' })
+  }
+
   useEffect(() => {
-    console.log({ context: state.context })
-  }, [state])
+    console.log({ context: snapshot.context })
+  }, [snapshot])
 
   return (
     <main>
-      {state.context.status === 'authenticated'
+      {snapshot.context.status === 'authenticated'
         ? (
           <div className="card">
             <div className="authenticated">
-              I’m authenticated 🔓
+              You are authenticated 🔓
             </div>
+            <button onClick={handleLogout}>🔐 Log out</button>
           </div>
         ) : (
           <div className="card">
             <div className="unauthenticated">
-              I’m not authenticated 🔒
+              Not authenticated 🔒
             </div>
-            {state.context.isLoading ? (
+            {snapshot.context.isLoading ? (
                 <div className="message">
                   <div className="loader"></div>
                   &nbsp;&nbsp; Loading

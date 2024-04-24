@@ -9,7 +9,7 @@ const timer = (delay: number, data: unknown) => new Promise((resolve) => setTime
 export const loginQuery = async ({ userName, password }: UserInput) => {
   console.log('do login', userName, password)
 
-  const user = await timer(5000, {
+  const user = await timer(1000, {
     name: 'me',
   })
 

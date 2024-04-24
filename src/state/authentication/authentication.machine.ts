@@ -1,6 +1,7 @@
 import { assign, fromPromise, setup } from 'xstate'
+
 import { loginQuery } from './authentication.queries.ts'
-import { User } from './types.ts'
+import type { User } from './types.ts'
 
 type AuthenticationContextType = {
   status: 'authenticated' | 'unauthenticated'
@@ -14,6 +15,7 @@ type AuthenticationEventType =
   | { type: 'setIsLoading' }
   | { type: 'setAuthentication', output: User | Error }
   | { type: 'handleIsAuthenticated' }
+  | { type: 'handleIsUnauthenticated' }
   | { type: 'setError' }
   | { type: 'handleError' }
 
@@ -23,9 +25,6 @@ export const authenticationMachine = setup({
     events: {} as AuthenticationEventType,
   },
   actions: {
-    logout: () => {
-      // todo
-    },
     setIsLoading: assign({
       isLoading: true,
     }),
@@ -34,14 +33,17 @@ export const authenticationMachine = setup({
       isLoading: false,
       status: 'authenticated',
     }),
-    handleIsAuthenticated: ({ context, event }, params) => {
+    handleIsAuthenticated: () => {
       console.log('save authentication somewhere')
     },
-    setError: ({ context, event }, params) => {
+    handleIsUnauthenticated: () => {
+      console.log('remove authentication data')
+    },
+    setError: () => {
       // Add your action code here
       // ...
     },
-    handleError: ({ context, event }, params) => {
+    handleError: () => {
       // Add your action code here
       // ...
     },
@@ -78,17 +80,12 @@ export const authenticationMachine = setup({
         },
         onDone: {
           target: 'Authenticated',
-          // actions: [
-          //   assign({
-          //     user: ({ event }) => event.output, // here event is strongly typed
-          //     isLoading: false,
-          //     status: 'authenticated',
-          //   }),
-          // ]
           actions: [
-            {
-              type: 'setAuthentication', // here we have to cast event type
-            },
+            assign({
+              user: ({ event }) => event.output, // here event is strongly typed
+              isLoading: false,
+              status: 'authenticated',
+            }),
             {
               type: 'handleIsAuthenticated',
             },
@@ -110,8 +107,20 @@ export const authenticationMachine = setup({
     Authenticated: {
       on: {
         logout: {
-          target: 'Unauthenticated',
+          target: 'ProcessUnAuthentication',
         },
+      },
+    },
+    ProcessUnAuthentication: {
+      entry: [
+        assign({
+          status: 'unauthenticated',
+          user: null,
+        }),
+        { type: 'handleIsUnauthenticated' }
+      ],
+      always: {
+        target: 'Unauthenticated',
       },
     },
   },
