@@ -31,7 +31,15 @@ function App() {
             <div className="unauthenticated">
               I’m not authenticated 🔒
             </div>
-            <button onClick={handleLogin}>🔐 Authenticate</button>
+            {state.context.isLoading ? (
+                <div className="message">
+                  <div className="loader"></div>
+                  &nbsp;&nbsp; Loading
+                </div>
+              ) : (
+                <button onClick={handleLogin}>🔐 Authenticate</button>
+              )
+            }
           </div>
         )
       }
