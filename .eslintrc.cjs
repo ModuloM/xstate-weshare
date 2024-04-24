@@ -43,6 +43,12 @@ module.exports = {
     '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     '@typescript-eslint/no-meaningless-void-operator': 'off',
     '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreVoidOperator: true }],
+    'react/sort-prop-types': [
+      // To have consistent ordering in proptypes
+      // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/sort-prop-types.md
+      'error',
+      { ignoreCase: true, requiredFirst: false, sortShapeProp: true },
+    ],
   },
   overrides: [
     {
