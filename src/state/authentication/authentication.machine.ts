@@ -13,17 +13,18 @@ type AuthenticationContextType = {
   status: keyof typeof AuthenticationStatus
   isLoading: boolean
   user: User | null
+  error: Error | null
 }
 
 type AuthenticationEventType =
-  | { type: 'login' }
+  | { type: 'login', output: User, error: Error }
   | { type: 'logout' }
   | { type: 'setIsLoading' }
   | { type: 'getAuthenticationInfo' }
-  | { type: 'setAuthentication', output: User | Error }
+  | { type: 'setAuthentication', output: User }
   | { type: 'handleIsAuthenticated' }
   | { type: 'handleIsUnauthenticated' }
-  | { type: 'setError' }
+  | { type: 'setError', error: Error }
   | { type: 'handleError' }
 
 export const authenticationMachine = setup({
@@ -43,8 +44,6 @@ export const authenticationMachine = setup({
     getAuthenticationInfo: assign(() => {
       const authenticationInfo = getAuthentication()
 
-      console.log('into the mayhem', authenticationInfo)
-
       if (authenticationInfo !== null) {
         return {
           user: authenticationInfo.user,
@@ -59,9 +58,10 @@ export const authenticationMachine = setup({
       }
     }),
     setAuthentication: assign({
-      user: ({ event }) => (event as Extract<AuthenticationEventType, { type: 'setAuthentication' }>).output,
+      user: ({ event }) => (event as Extract<AuthenticationEventType, { type: 'login' }>).output,
       isLoading: false,
       status: 'authenticated',
+      error: null,
     }),
     handleIsAuthenticated: ({ context }) => {
       if (context.user) {
@@ -72,23 +72,34 @@ export const authenticationMachine = setup({
       console.log('remove authentication data')
       deleteAuthenticationInfo()
     },
-    setError: () => {
-      // Add your action code here
-      // ...
-    },
+    setError: assign(({context, event}) => {
+      if (
+        event.type === 'xstate.error.actor.login'
+        && event.error?.name === 'MFA'
+      ) {
+        console.log('error', event.error)
+
+        return ({
+          user: null,
+          error: event.error,
+        })
+      }
+
+      return context
+    }),
     handleError: () => {
-      // Add your action code here
-      // ...
+      console.log('there is an error')
     },
   },
   actors: {
-    authenticate: fromPromise<User, { userName: string, password: string }>(async ({ input }) => await loginQuery(input)),
+    authenticate: fromPromise<User | Error, { userName: string, password: string }>(async ({ input }) => await loginQuery(input)),
   },
 }).createMachine({
   context: {
     status: 'unauthenticated',
     isLoading: false,
     user: null,
+    error: null,
   },
   id: 'Authentication - 1 - Login',
   initial: 'Unauthenticated',
@@ -105,7 +116,7 @@ export const authenticationMachine = setup({
           },
         },
         {
-          target: "Unauthenticated",
+          target: 'Unauthenticated',
         },
       ],
       on: {

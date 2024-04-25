@@ -1,17 +1,15 @@
-import type { User } from './types.ts'
-
 type UserInput = {
   userName: string
   password: string
 }
-const timer = (delay: number, data: unknown) => new Promise((resolve) => setTimeout(() => resolve(data), delay))
+const timer = (delay: number) => new Promise((_, reject) => setTimeout(() => {
+  const error = new Error('MFA needed')
+  error.name = 'MFA'
+  reject(error)
+}, delay))
 
 export const loginQuery = async ({ userName, password }: UserInput) => {
   console.log('do login', userName, password)
 
-  const user = await timer(1000, {
-    name: 'me',
-  })
-
-  return user as User
+  return await timer(1000) as Promise<Error>
 }
