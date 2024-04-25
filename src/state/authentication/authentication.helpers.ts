@@ -5,7 +5,7 @@ export const getAuthentication = () => {
   console.log('retrieve authentication info')
   const authenticationData = localStorage.getItem(AUTHENTICATION_KEY)
 
-  if (authenticationData) {
+  if (authenticationData && authenticationData != '') {
     return JSON.parse(authenticationData) as AuthenticationInfo
   }
 

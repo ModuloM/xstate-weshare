@@ -43,18 +43,13 @@ export const authenticationMachine = setup({
     getAuthenticationInfo: assign(() => {
       const authenticationInfo = getAuthentication()
 
-      console.log('into the mayhem', authenticationInfo)
-
       if (authenticationInfo !== null) {
         return {
           user: authenticationInfo.user,
-          status: AuthenticationStatus.authenticated,
         }
       }
 
       return {
-        status: AuthenticationStatus.unauthenticated,
-        isLoading: false,
         user: null,
       }
     }),
@@ -155,6 +150,12 @@ export const authenticationMachine = setup({
       },
     },
     Authenticated: {
+      entry: [
+        assign({
+          status: AuthenticationStatus.authenticated,
+        }),
+        { type: 'handleIsAuthenticated' }
+      ],
       on: {
         logout: {
           target: 'ProcessUnAuthentication',
@@ -164,7 +165,7 @@ export const authenticationMachine = setup({
     ProcessUnAuthentication: {
       entry: [
         assign({
-          status: 'unauthenticated',
+          status: AuthenticationStatus.unauthenticated,
           user: null,
         }),
         { type: 'handleIsUnauthenticated' }
