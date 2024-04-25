@@ -27,14 +27,14 @@ function App() {
         ? (
           <div className="card">
             <div className="authenticated">
-              I’m authenticated 🔓
+              {`${snapshot.context.user?.name} is` || 'you are'} authenticated 🔓
             </div>
             <button onClick={handleLogout}>🔐 Log out</button>
           </div>
         ) : (
           <div className="card">
             <div className="unauthenticated">
-              I’m not authenticated 🔒
+              Not authenticated 🔒
             </div>
             {snapshot.context.isLoading ? (
                 <div className="message">

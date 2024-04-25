@@ -1,9 +1,16 @@
 import { assign, fromPromise, setup } from 'xstate'
+
 import { loginQuery } from './authentication.queries.ts'
-import { User } from './types.ts'
+import type { User } from './types.ts'
+import { deleteAuthenticationInfo, getAuthentication, setAuthenticationInfo } from './authentication.helpers.ts'
+
+const AuthenticationStatus = {
+  authenticated: 'authenticated',
+  unauthenticated: 'unauthenticated',
+} as const
 
 type AuthenticationContextType = {
-  status: 'authenticated' | 'unauthenticated'
+  status: keyof typeof AuthenticationStatus
   isLoading: boolean
   user: User | null
 }
@@ -12,6 +19,7 @@ type AuthenticationEventType =
   | { type: 'login' }
   | { type: 'logout' }
   | { type: 'setIsLoading' }
+  | { type: 'getAuthenticationInfo' }
   | { type: 'setAuthentication', output: User | Error }
   | { type: 'handleIsAuthenticated' }
   | { type: 'handleIsUnauthenticated' }
@@ -23,29 +31,52 @@ export const authenticationMachine = setup({
     context: {} as AuthenticationContextType,
     events: {} as AuthenticationEventType,
   },
-  actions: {
-    logout: () => {
-      // todo
+  guards: {
+    hasAuthenticationInfo: function ({context}) {
+      return Boolean(context.user)
     },
+  },
+  actions: {
     setIsLoading: assign({
       isLoading: true,
+    }),
+    getAuthenticationInfo: assign(() => {
+      const authenticationInfo = getAuthentication()
+
+      console.log('into the mayhem', authenticationInfo)
+
+      if (authenticationInfo !== null) {
+        return {
+          user: authenticationInfo.user,
+          status: AuthenticationStatus.authenticated,
+        }
+      }
+
+      return {
+        status: AuthenticationStatus.unauthenticated,
+        isLoading: false,
+        user: null,
+      }
     }),
     setAuthentication: assign({
       user: ({ event }) => (event as Extract<AuthenticationEventType, { type: 'setAuthentication' }>).output,
       isLoading: false,
       status: 'authenticated',
     }),
-    handleIsAuthenticated: ({ context, event }, params) => {
-      console.log('save authentication somewhere')
+    handleIsAuthenticated: ({ context }) => {
+      if (context.user) {
+        setAuthenticationInfo(context.user)
+      }
     },
     handleIsUnauthenticated: () => {
       console.log('remove authentication data')
+      deleteAuthenticationInfo()
     },
-    setError: ({ context, event }, params) => {
+    setError: () => {
       // Add your action code here
       // ...
     },
-    handleError: ({ context, event }, params) => {
+    handleError: () => {
       // Add your action code here
       // ...
     },
@@ -63,6 +94,20 @@ export const authenticationMachine = setup({
   initial: 'Unauthenticated',
   states: {
     Unauthenticated: {
+      entry: {
+        type: 'getAuthenticationInfo',
+      },
+      always: [
+        {
+          target: 'Authenticated',
+          guard: {
+            type: 'hasAuthenticationInfo',
+          },
+        },
+        {
+          target: "Unauthenticated",
+        },
+      ],
       on: {
         login: {
           target: 'ProcessAuthentication',
@@ -70,9 +115,12 @@ export const authenticationMachine = setup({
       },
     },
     ProcessAuthentication: {
-      entry: {
+      entry: [
+        () => console.log('login ...'),
+        {
         type: 'setIsLoading',
-      },
+        },
+      ],
       invoke: {
         id: 'login',
         src: 'authenticate',
@@ -122,7 +170,7 @@ export const authenticationMachine = setup({
         { type: 'handleIsUnauthenticated' }
       ],
       always: {
-        target: "Unauthenticated",
+        target: 'Unauthenticated',
       },
     },
   },
