@@ -15,7 +15,6 @@ const demoMachine = setup({
     events: {} as DemoEventType,
   },
   actions: {
-    // Promise Actor
     myAction: () => {
       console.log('myAction is called')
     },
@@ -24,6 +23,7 @@ const demoMachine = setup({
     myGuard: ({ context }) => context.is === 'A',
   },
   actors: {
+    // Promise Actor
     myActor: fromPromise(async () => {
       return new Promise((resolve) => {
         setTimeout(() => void resolve(42), 100)
