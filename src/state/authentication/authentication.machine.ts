@@ -1,4 +1,4 @@
-import { assign, fromPromise, setup } from 'xstate'
+import { actions, assign, fromPromise, setup } from 'xstate'
 
 import { loginQuery } from './authentication.queries.ts'
 import type { User } from './types.ts'
@@ -43,18 +43,13 @@ export const authenticationMachine = setup({
     getAuthenticationInfo: assign(() => {
       const authenticationInfo = getAuthentication()
 
-      console.log('into the mayhem', authenticationInfo)
-
       if (authenticationInfo !== null) {
         return {
           user: authenticationInfo.user,
-          status: AuthenticationStatus.authenticated,
         }
       }
 
       return {
-        status: AuthenticationStatus.unauthenticated,
-        isLoading: false,
         user: null,
       }
     }),
@@ -68,6 +63,7 @@ export const authenticationMachine = setup({
         setAuthenticationInfo(context.user)
       }
     },
+    handleRenewToken: () => console.log('Renew token'),
     handleIsUnauthenticated: () => {
       console.log('remove authentication data')
       deleteAuthenticationInfo()
@@ -155,16 +151,33 @@ export const authenticationMachine = setup({
       },
     },
     Authenticated: {
+      entry: [
+        assign({
+          status: AuthenticationStatus.authenticated,
+        }),
+        { type: 'handleIsAuthenticated' },
+      ],
+      after: {
+        1000: {
+          target: 'ProcessRenewToken',
+        },
+      },
       on: {
         logout: {
           target: 'ProcessUnAuthentication',
         },
       },
     },
+    ProcessRenewToken: {
+      entry: [
+        { type: 'handleRenewToken' }
+      ],
+      always: { target: 'Authenticated' },
+    },
     ProcessUnAuthentication: {
       entry: [
         assign({
-          status: 'unauthenticated',
+          status: AuthenticationStatus.unauthenticated,
           user: null,
         }),
         { type: 'handleIsUnauthenticated' }
