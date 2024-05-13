@@ -16,7 +16,7 @@ const demoMachine = setup({
   },
   actions: {
     myAction: () => {
-      console.log('myAction is called')
+      console.log('myAction entry is called')
     },
   },
   guards: {
@@ -39,31 +39,31 @@ const demoMachine = setup({
     A: {
       entry: { type: 'myAction' },
       on: {
-        doA: {
-          guard: {type: 'myGuard'},
-          // context is immutable, must use assign fn to mutate it
-          // Transition Actor
-          actions: assign({
-            is: 'A',
-            value: ({ context, event }) => {
-              if (context.is !== undefined && context.is === 'A') {
-                return event.value
-              }
-              return context.value
-            },
-          })
-        },
+        doA: [
+          {
+            guard: {type: 'myGuard'},
+            // context is immutable, must use assign fn to mutate it
+            target: 'A',
+            actions: assign({
+              is: 'A',
+              value: ({ context, event }) => {
+                if (context.is !== undefined && context.is === 'A') {
+                  return event.value
+                }
+                return context.value
+              },
+            })
+          },
+          {
+            target: 'A',
+            actions: assign({
+              is: 'A',
+            }),
+          },
+        ],
       }
     }
   }
 })
 
-const demoActor = createActor(demoMachine)
-
-demoActor.subscribe((state) => {
-  console.log(state.value)
-})
-
-demoActor.start()
-demoActor.send({ type: 'doA', value: 7})
-demoActor.stop()
+export const demoActor = createActor(demoMachine)

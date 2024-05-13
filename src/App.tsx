@@ -1,40 +1,22 @@
 import './App.css'
 
-import {useMachine} from "@xstate/react";
-
-import {authenticationMachine} from "./state/authentication/authentication.machine.ts";
-import {useEffect} from "react";
+import { demoActor } from './state/presentation/demo.machine'
 
 function App() {
 
-  const [state, send] = useMachine(authenticationMachine)
+  demoActor.subscribe((state) => {
+    console.log(state.context)
+  })
 
-  const handleLogin = () => {
-    send({ type: 'login' })
-  }
-
-  useEffect(() => {
-    console.log({ context: state.context })
-  }, [state])
+  demoActor.start()
+  demoActor.send({ type: 'doA', value: 7})
+  demoActor.send({ type: 'doA', value: 42})
+  demoActor.stop()
+  demoActor.send({ type: 'doA', value: 30})
 
   return (
     <main>
-      {state.context.status === 'authenticated'
-        ? (
-          <div className="card">
-            <div className="authenticated">
-              I’m authenticated 🔓
-            </div>
-          </div>
-        ) : (
-          <div className="card">
-            <div className="unauthenticated">
-              I’m not authenticated 🔒
-            </div>
-            <button onClick={handleLogin}>🔐 Authenticate</button>
-          </div>
-        )
-      }
+      <span style={{color: 'white'}}>This is a test</span>
     </main>
   )
 }
