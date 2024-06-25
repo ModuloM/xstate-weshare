@@ -1,4 +1,5 @@
 import { assign, fromPromise, setup } from 'xstate'
+import type { ErrorActorEvent } from 'xstate'
 
 import { loginQuery } from './authentication.queries.ts'
 import type { User } from './types.ts'
@@ -18,6 +19,8 @@ type AuthenticationContextType = {
 
 type AuthenticationEventType =
   | { type: 'login', output: User, error: Error }
+  // This should not be necessary
+  | { type: 'xstate.error.actor.login', error: Error}
   | { type: 'logout' }
   | { type: 'setIsLoading' }
   | { type: 'getAuthenticationInfo' }
