@@ -1,4 +1,4 @@
-import { actions, assign, fromPromise, setup } from 'xstate'
+import { assign, fromPromise, setup } from 'xstate'
 
 import { loginQuery } from './authentication.queries.ts'
 import type { User } from './types.ts'
@@ -102,7 +102,7 @@ export const authenticationMachine = setup({
           },
         },
         {
-          target: "Unauthenticated",
+          target: 'Unauthenticated',
         },
       ],
     },
